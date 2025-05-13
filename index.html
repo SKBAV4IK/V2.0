@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Олимпийские чемпионы Хабаровского края</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --olympic-blue: #0085C7;
+            --olympic-yellow: #F4C300;
+            --olympic-green: #009F3D;
+            --olympic-red: #DF0024;
+            --olympic-black: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Олимпийские кольца как фон */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120vw;
+            height: 120vh;
+            background:
+                radial-gradient(circle at 20% 50%, var(--olympic-blue) 0%, transparent 15%),
+                radial-gradient(circle at 40% 30%, var(--olympic-yellow) 0%, transparent 15%),
+                radial-gradient(circle at 60% 40%, var(--olympic-black) 0%, transparent 15%),
+                radial-gradient(circle at 80% 50%, var(--olympic-green) 0%, transparent 15%),
+                radial-gradient(circle at 50% 70%, var(--olympic-red) 0%, transparent 15%);
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 50px;
+            color: #222;
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--olympic-blue),
+                var(--olympic-yellow),
+                var(--olympic-green),
+                var(--olympic-red));
+            border-radius: 2px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg,
+                rgba(0, 133, 199, 0.1) 0%,
+                rgba(244, 195, 0, 0.1) 50%,
+                rgba(0, 159, 61, 0.1) 100%);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .card:hover .card-img {
+            transform: scale(1.05);
+        }
+
+        .medal-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: gold;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        .card-content {
+            padding: 20px;
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            color: #222;
+            font-weight: 700;
+        }
+
+        .card-sport {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--olympic-blue), var(--olympic-green));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .card-brief {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .card-year {
+            display: flex;
+            align-items: center;
+            color: var(--olympic-blue);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .card-year i {
+            margin-right: 8px;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 40px 20px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,245,245,0.98) 100%);
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-img-container {
+            width: 100%;
+            height: 350px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            color: #222;
+            font-weight: 800;
+            margin-right: 20px;
+        }
+
+        .modal-subtitle {
+            color: var(--olympic-blue);
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-subtitle i {
+            margin-right: 10px;
+        }
+
+        .modal-text {
+            line-height: 1.7;
+            margin-bottom: 30px;
+            color: #444;
+        }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: rgba(0, 133, 199, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--olympic-blue);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--olympic-blue);
+        }
+
+        .modal-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(90deg, var(--olympic-blue), var(--olympic-green));
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 133, 199, 0.3);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 133, 199, 0.4);
+        }
+
+        .modal-btn i {
+            margin-left: 8px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            z-index: 10;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            backdrop-filter: blur(5px);
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+            background: rgba(223, 0, 36, 0.7);
+        }
+
+        /* Олимпийские кольца в футере модального окна */
+        .olympic-rings {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .ring {
+            width: 30px;
+            height: 30px;
+            border: 3px solid;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+
+        .ring.blue { border-color: var(--olympic-blue); }
+        .ring.yellow { border-color: var(--olympic-yellow); }
+        .ring.black { border-color: var(--olympic-black); }
+        .ring.green { border-color: var(--olympic-green); }
+        .ring.red { border-color: var(--olympic-red); }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .cards-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+
+            .modal-content {
+                max-width: 100%;
+            }
+
+            .modal-img-container {
+                height: 250px;
+            }
+
+            .modal-title {
+                font-size: 1.6rem;
+            }
+
+            .modal-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Олимпийские чемпионы Хабаровского края</h1>
+
+        <div class="cards-container">
+            <!-- Карточка 1 -->
+            <div class="card" onclick="openModal('modal1')">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1547347298-4074fc3086f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Иванов Иван" class="card-img">
+                    <i class="fas fa-medal medal-icon"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Иванов Иван Иванович</h2>
+                    <span class="card-sport">Лыжные гонки</span>
+                    <p class="card-brief">Золотой призер Олимпиады в Ванкувере 2010, 3-кратный чемпион мира, заслуженный мастер спорта России.</p>
+                    <div class="card-year">
+                        <i class="fas fa-trophy"></i> Олимпийский чемпион 2010
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 2 -->
+            <div class="card" onclick="openModal('modal2')">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Петрова Светлана" class="card-img">
+                    <i class="fas fa-medal medal-icon"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Петрова Светлана Сергеевна</h2>
+                    <span class="card-sport">Биатлон</span>
+                    <p class="card-brief">Двукратная олимпийская чемпионка (2014, 2018), обладательница Кубка мира 2016 года.</p>
+                    <div class="card-year">
+                        <i class="fas fa-trophy"></i> Чемпионка 2014, 2018
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 3 -->
+            <div class="card" onclick="openModal('modal3')">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Сидоров Алексей" class="card-img">
+                    <i class="fas fa-medal medal-icon"></i>
+                </div>
+                <div class="card-content">
+                    <h2 class="card-title">Сидоров Алексей Владимирович</h2>
+                    <span class="card-sport">Плавание</span>
+                    <p class="card-brief">Серебряный призер Олимпиады-2012, бронзовый призер Олимпиады-2016, рекордсмен России.</p>
+                    <div class="card-year">
+                        <i class="fas fa-trophy"></i> Призер 2012, 2016
+                    </div>
+                </div>
+            </div>
+
+            <!-- Добавьте остальные 12 карточек по аналогии -->
+
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <!-- Модальное окно 1 -->
+    <div id="modal1" class="modal">
+        <span class="close-btn" onclick="closeModal('modal1')">&times;</span>
+        <div class="modal-content">
+            <div class="modal-img-container">
+                <img src="https://images.unsplash.com/photo-1547347298-4074fc3086f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="Иванов Иван" class="modal-img">
+            </div>
+            <div class="modal-body">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title">Иванов Иван Иванович</h2>
+                        <p class="modal-subtitle">
+                            <i class="fas fa-skiing"></i> Лыжные гонки | Олимпийский чемпион 2010
+                        </p>
+                    </div>
+                </div>
+
+                <div class="modal-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Годы карьеры</div>
+                        <div class="stat-value">2003-2018</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Олимпийские медали</div>
+                        <div class="stat-value">1 золото</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Чемпионаты мира</div>
+                        <div class="stat-value">3 золота</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Родился</div>
+                        <div class="stat-value">15.05.1985</div>
+                    </div>
+                </div>
+
+                <p class="modal-text">
+                    Иван Иванович Иванов — выдающийся российский лыжник, олимпийский чемпион 2010 года в эстафете 4×10 км,
+                    заслуженный мастер спорта России. Родился и вырос в Хабаровске, где начал заниматься лыжными гонками
+                    в возрасте 10 лет под руководством своего первого тренера Петрова П.П.<br><br>
+
+                    В 2005 году вошёл в состав сборной России. Пик карьеры пришёлся на 2010 год, когда на Олимпийских играх
+                    в Ванкувере он в составе эстафетной команды завоевал золотую медаль, показав выдающийся результат на своём этапе.<br><br>
+
+                    После завершения спортивной карьеры в 2018 году работает тренером в хабаровской СДЮСШОР, воспитывая новое поколение
+                    лыжников. Награждён орденом Дружбы за вклад в развитие спорта.
+                </p>
+
+                <a href="https://example.com/ivanov" class="modal-btn" target="_blank">
+                    Подробнее на сайте <i class="fas fa-external-link-alt"></i>
+                </a>
+
+                <div class="olympic-rings">
+                    <div class="ring blue"></div>
+                    <div class="ring yellow"></div>
+                    <div class="ring black"></div>
+                    <div class="ring green"></div>
+                    <div class="ring red"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно 2 -->
+    <div id="modal2" class="modal">
+        <span class="close-btn" onclick="closeModal('modal2')">&times;</span>
+        <div class="modal-content">
+            <div class="modal-img-container">
+                <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="Петрова Светлана" class="modal-img">
+            </div>
+            <div class="modal-body">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title">Петрова Светлана Сергеевна</h2>
+                        <p class="modal-subtitle">
+                            <i class="fas fa-bullseye"></i> Биатлон | Двукратная олимпийская чемпионка
+                        </p>
+                    </div>
+                </div>
+
+                <div class="modal-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Годы карьеры</div>
+                        <div class="stat-value">2008-2020</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Олимпийские медали</div>
+                        <div class="stat-value">2 золота</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Кубки мира</div>
+                        <div class="stat-value">1 (2016)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Родилась</div>
+                        <div class="stat-value">12.03.1990</div>
+                    </div>
+                </div>
+
+                <p class="modal-text">
+                    Светлана Петрова — легенда российского биатлона, двукратная олимпийская чемпионка (Сочи-2014, Пхёнчхан-2018),
+                    обладательница Кубка мира 2016 года. Родилась в Комсомольске-на-Амуре, где начала спортивную карьеру с лыжных гонок,
+                    но в 2008 году перешла в биатлон.<br><br>
+
+                    Первый крупный успех пришёл в 2014 году на домашней Олимпиаде в Сочи, где Светлана завоевала золото в масс-старте.
+                    В 2018 году повторила успех в Пхёнчхане, выиграв индивидуальную гонку. В сезоне 2015/2016 стала первой российской
+                    биатлонисткой за 10 лет, выигравшей общий зачёт Кубка мира.<br><br>
+
+                    Завершила карьеру в 2020 году. В настоящее время — эксперт на спортивных телеканалах и посол зимней Универсиады-2025
+                    в Хабаровске. Награждена орденом "За заслуги перед Отечеством" IV степени.
+                </p>
+
+                <a href="https://example.com/petrova" class="modal-btn" target="_blank">
+                    Подробнее на сайте <i class="fas fa-external-link-alt"></i>
+                </a>
+
+                <div class="olympic-rings">
+                    <div class="ring blue"></div>
+                    <div class="ring yellow"></div>
+                    <div class="ring black"></div>
+                    <div class="ring green"></div>
+                    <div class="ring red"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно 3 -->
+    <div id="modal3" class="modal">
+        <span class="close-btn" onclick="closeModal('modal3')">&times;</span>
+        <div class="modal-content">
+            <div class="modal-img-container">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="Сидоров Алексей" class="modal-img">
+            </div>
+            <div class="modal-body">
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title">Сидоров Алексей Владимирович</h2>
+                        <p class="modal-subtitle">
+                            <i class="fas fa-swimmer"></i> Плавание | Призер Олимпийских игр
+                        </p>
+                    </div>
+                </div>
+
+                <div class="modal-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Годы карьеры</div>
+                        <div class="stat-value">2008-2021</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Олимпийские медали</div>
+                        <div class="stat-value">1 серебро, 1 бронза</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Рекорды России</div>
+                        <div class="stat-value">2 (200 брасс)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Родился</div>
+                        <div class="stat-value">03.07.1992</div>
+                    </div>
+                </div>
+
+                <p class="modal-text">
+                    Алексей Сидоров — выдающийся российский пловец, специализировавшийся в брассе. Серебряный призёр Олимпийских игр 2012 года
+                    в Лондоне на дистанции 200 метров брассом и бронзовый призёр Олимпиады-2016 в Рио-де-Жанейро на 100-метровке брассом.<br><br>
+
+                    Родился и тренировался в Хабаровске, где начал плавать с 6 лет. В 2008 году впервые вошёл в состав сборной России.
+                    На чемпионате мира 2011 года установил рекорд России на 200 м брассом, который продержался до 2019 года.<br><br>
+
+                    После завершения карьеры в 2021 году работает спортивным комментатором на федеральных каналах, а также развивает
+                    школу плавания в Хабаровске. Мастер спорта международного класса, кавалер медали "За трудовую доблесть".
+                </p>
+
+                <a href="https://example.com/sidorov" class="modal-btn" target="_blank">
+                    Подробнее на сайте <i class="fas fa-external-link-alt"></i>
+                </a>
+
+                <div class="olympic-rings">
+                    <div class="ring blue"></div>
+                    <div class="ring yellow"></div>
+                    <div class="ring black"></div>
+                    <div class="ring green"></div>
+                    <div class="ring red"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Добавьте остальные модальные окна по аналогии -->
+
+    <script>
+        // Функция для открытия модального окна
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Функция для закрытия модального окна
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Закрытие при клике вне модального окна
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Закрытие по ESC
+        document.onkeydown = function(event) {
+            if (event.key === "Escape") {
+                const modals = document.getElementsByClassName('modal');
+                for (let modal of modals) {
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            }
+        };
+    </script>
+</body>
+</html>
